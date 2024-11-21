@@ -15,8 +15,8 @@ export const notoSansJP = Noto_Sans_JP({
 });
 
 export const metadata = {
-  title: "Constitution AI Teacher",
-  description: "Learn Constitution with AI Teacher",
+  title: "Prepia",
+  description: "One and only Teaching Solution",
 };
 
 export default function RootLayout({ children }) {
