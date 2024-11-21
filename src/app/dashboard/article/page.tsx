@@ -34,7 +34,7 @@ export default function Articles() {
       if (!token) return;
       setLoading(true);
       try {
-        const response = await axiosInstance.get('https://prepify-revamp.onrender.com/api/articles/articlesgen');
+        const response = await axiosInstance.get('https://lightning-hackathon-server.onrender.com/generate-article');
         setArticles(response.data.articles);
       } catch {
         setError('Failed to fetch articles.');
@@ -58,7 +58,7 @@ export default function Articles() {
     setLoading(true);
 
     try {
-      const response = await axiosInstance.post('https://prepify-revamp.onrender.com/api/articles/articlesgen', { topic });
+      const response = await axiosInstance.post('https://lightning-hackathon-server.onrender.com/generate-article', { topic });
       if (response.data.article) {
         setSuccessMessage('Article created successfully!');
         setArticles((prevArticles) => [response.data.article, ...prevArticles]);

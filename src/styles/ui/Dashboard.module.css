@@ -1,0 +1,73 @@
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #4b0082;
+    position: relative;
+    overflow: hidden;
+    border-radius: 20px;
+    padding: 1rem;
+    box-shadow: 0 0 20px 5px rgba(255, 255, 255, 0.1);
+  }
+  
+  .glowingBorder {
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+    animation: glowing 3s infinite alternate;
+    pointer-events: none;
+  }
+  
+  @keyframes glowing {
+    0% {
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    }
+    100% {
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
+  }
+  
+  .particle {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: move 10s linear infinite;
+  }
+  
+  @keyframes move {
+    0% {
+      transform: translate(0, 0) scale(0.5);
+    }
+    50% {
+      transform: translate(100px, 200px) scale(1.2);
+    }
+    100% {
+      transform: translate(200px, 0) scale(0.5);
+    }
+  }
+  
+  .dropdown {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    font-size: 1.125rem;
+    font-weight: 500;
+    background-color: #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .dropdown:hover {
+    background-color: #d6d6d6;
+  }
+  
+  .iconWithText {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  

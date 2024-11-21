@@ -1,0 +1,75 @@
+/* styles/ui/CustomModal.module.css */
+
+/* Overlay Styles */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Modal Styles */
+.modal {
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 16px;
+    max-width: 600px;
+    width: 90%;
+    position: relative;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Fade In Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Close Button Styles */
+.closeButton {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #6b7280;
+    transition: color 0.3s;
+}
+
+.closeButton:hover {
+    color: #374151;
+}
+
+/* Modal Title Styles */
+.modalTitle {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #2d0059;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+/* Modal Content Styles */
+.modalContent {
+    font-size: 1rem;
+    color: #374151;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
