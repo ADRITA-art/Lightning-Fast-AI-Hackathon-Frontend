@@ -37,6 +37,14 @@ Prepify is a cutting-edge solution designed to make **engineering education** ac
 - Prepify uses **SambaNova AI** to create a clear, engaging article.
 - Articles are optimized for readability and understanding.
 
+
+**Powered By:**
+- **SambaNova Cloud API**: Advanced AI processing with `Meta-Llama-3.1-8B-Instruct`.
+- **Settings**: 
+  - **Max Tokens**: 500  
+  - **Temperature**: 0.7 (striking a balance between creativity and accuracy).
+
+
 ---
 
 ### ❓ **Question Generation**
@@ -49,6 +57,13 @@ Prepify is a cutting-edge solution designed to make **engineering education** ac
 - Supports various complexity levels for customized practice.
 - Powered by **SambaNova Cloud API**.
 
+ **Powered By:**
+- **SambaNova Cloud API**: Advanced AI processing with `Meta-Llama-3.1-8B-Instruct`.
+- **Settings**: 
+  - **Max Tokens**: 500  
+  - **Temperature**: 0.7 (striking a balance between creativity and accuracy).
+
+
 ---
 
 ### 📈 **Performance Evaluation**
@@ -57,6 +72,10 @@ Prepify is a cutting-edge solution designed to make **engineering education** ac
 - Upload answers to generated questions for evaluation.
 - Receive detailed performance reports.
 - Identify areas for improvement with actionable feedback.
+
+**AI Integration: SambaNova AI Model:**
+- OCR: Llama-3.2-11B-Vision-Instruct
+- Text Processing & Evaluation: Meta-Llama-3.1-8B-Instruct
 
 ---
 
