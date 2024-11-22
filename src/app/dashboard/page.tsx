@@ -1,7 +1,8 @@
-
 "use client";
 import { useState } from "react";
 import axios from "axios";
+import { motion } from "framer-motion";
+import Button from "@/Components/GenerateButton";
 import ArticleModal from "@/Components/ArticleModal";
 import QuestionModal from "@/Components/QuestionModal";
 
@@ -11,18 +12,33 @@ export default function Home() {
   const [showQuestionModal, setShowQuestionModal] = useState(false);
   const [topic, setTopic] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [questionContent, setQuestionContent] = useState("");
   const [loadingQuestion, setLoadingQuestion] = useState(false);
+  const [image, setImage] = useState(null);
+
+  const [syllabusImage, setSyllabusImage] = useState<File | null>(null);
+  const [syllabusText, setSyllabusText] = useState("");
+
+  const [questionImage, setQuestionImage] = useState<File | null>(null);
+  const [answerImage, setAnswerImage] = useState<File | null>(null);
+  
+  const [evaluationResult, setEvaluationResult] = useState("");
+  const [evaluating, setEvaluating] = useState(false);
 
   const handleGenerateArticle = async () => {
     if (!topic.trim()) {
-      alert("Please enter a topic.");
+      setError("Topic must be provided to generate an article.");
       return;
     }
+    setError("");
 
     setLoading(true);
     try {
-      const response = await axios.post("https://lightning-hackathon-server.onrender.com/generate-article", { topic });
+      const response = await axios.post(
+        "https://lightning-hackathon-server.onrender.com/generate-article",
+        { topic }
+      );
       setArticleContent(response.data.article || "No article was generated.");
       setShowArticleModal(true);
     } catch (error) {
@@ -34,40 +50,41 @@ export default function Home() {
     }
   };
 
-  const handleGenerateQuestions = async (syllabusImage?: File, syllabusTextInput?: string) => {
-    if (!syllabusTextInput?.trim() && !syllabusImage) {
-      alert("Please upload an image or type the syllabus manually.");
+  const handleGenerateQuestions = async () => {
+    if (!syllabusImage && !syllabusText.trim()) {
+      alert("Please provide either an image or text for the syllabus.");
       return;
     }
 
     setLoadingQuestion(true);
     try {
       const formData = new FormData();
-
       if (syllabusImage) formData.append("syllabus_image", syllabusImage);
-      if (syllabusTextInput?.trim()) formData.append("syllabus_text", syllabusTextInput);
+      if (syllabusText.trim()) formData.append("syllabus_text", syllabusText);
 
       const response = await axios.post(
         "https://lightning-hackathon-server.onrender.com/generate-questions",
         formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
+        { headers: { "Content-Type": "multipart/form-data" }, timeout: 10000 }
       );
 
-      const shortQuestions = response.data.short_questions || [];
-      const descriptiveQuestions = response.data.descriptive_questions || [];
+      const shortQuestions = Array.isArray(response.data.short_questions) ? response.data.short_questions : [];
+      const descriptiveQuestions = Array.isArray(response.data.descriptive_questions) ? response.data.descriptive_questions : [];
+
       if (shortQuestions.length > 0 || descriptiveQuestions.length > 0) {
         const formattedContent = [
           "Short Questions:",
-          ...shortQuestions.map((q: string, i: number) => `${i + 1}. ${q}`),
+          ...shortQuestions.map((q: { question: string }, i: number) => `${i + 1}. ${q.question || "No question text available"}`),
           "",
           "Descriptive Questions:",
-          ...descriptiveQuestions.map((q: string, i: number) => `${i + 1}. ${q}`),
+          ...descriptiveQuestions.map((q: { question: string }, i: number) => `${i + 1}. ${q.question || "No question text available"}`),
         ].join("\n");
 
         setQuestionContent(formattedContent);
       } else {
         setQuestionContent("No questions were generated.");
       }
+
       setShowQuestionModal(true);
     } catch (error) {
       console.error("Error generating questions:", error);
@@ -78,63 +95,149 @@ export default function Home() {
     }
   };
 
+  const handleClearFile = () => {
+    setSyllabusImage(null);
+    setImage(null);
+  };
+  const handleEvaluatePerformance = async () => {
+    if (!questionImage || !answerImage) {
+      alert("Please upload both the question and answer images.");
+      return;
+    }
+
+    setEvaluating(true);
+    try {
+      const formData = new FormData();
+      formData.append("question_image", questionImage);
+      formData.append("answer_image", answerImage);
+
+      const response = await axios.post(
+        "https://lightning-hackathon-server.onrender.com/evaluate-performance",
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
+      setEvaluationResult(response.data.evaluation || "No evaluation available.");
+    } catch (error) {
+      console.error("Error evaluating performance:", error);
+      setEvaluationResult("Failed to evaluate performance. Please try again later.");
+    } finally {
+      setEvaluating(false);
+    }
+  };
+
+
   return (
-    <div className="min-h-screen bg-purple-600 flex justify-center items-center">
-      <div className="grid grid-cols-2 gap-4 p-8 bg-gray-100 rounded-lg">
-        {/* Article Generation Section */}
-        <div className="p-4 bg-gray-300 rounded-md shadow-md">
-          <h2 className="text-xl font-bold mb-4">Article Generation</h2>
+    <div className="min-h-screen bg-gradient-to-br from-blue-500 to-indigo-600 flex justify-center items-center p-6">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="grid grid-cols-2 gap-6 w-full max-w-5xl bg-white p-8 rounded-2xl shadow-2xl"
+      >
+        {/* Article Generation */}
+        <motion.div
+          className="p-6 bg-gradient-to-br from-indigo-100 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-300"
+          whileHover={{ scale: 1.02 }}
+        >
+          <h2 className="text-lg font-semibold text-indigo-700 mb-4">Generate Article</h2>
           <input
             type="text"
-            placeholder="Give topic"
+            placeholder="Enter a topic"
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
-            className="w-full p-2 border border-gray-400 rounded-md mb-4"
+            className="w-full p-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400 text-base"
+            style={{ minHeight: "80px" }}
           />
-          <button
-            className={`bg-red-600 text-white px-4 py-2 rounded-md ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
-            onClick={handleGenerateArticle}
-            disabled={loading}
-          >
-            {loading ? "Generating..." : "Generate Article"}
-          </button>
-        </div>
+          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+          <div className="mt-6">
+            <Button onClick={handleGenerateArticle} loading={loading}>
+              Generate
+            </Button>
+          </div>
+        </motion.div>
 
-        {/* Question Generation Section */}
-        <div className="p-4 bg-gray-300 rounded-md shadow-md">
-          <h2 className="text-xl font-bold mb-4">Generate Questions</h2>
+        {/* Question Generation */}
+        <motion.div
+          className="p-6 bg-gradient-to-br from-indigo-100 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-300"
+          whileHover={{ scale: 1.02 }}
+        >
+          <h2 className="text-lg font-semibold text-indigo-700 mb-4">Generate Questions</h2>
+          <div className="relative">
+            <input
+              type="file"
+              accept="image/*"
+              className="block w-full p-3 bg-white border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              onChange={(e) => {
+                if (e.target.files) setSyllabusImage(e.target.files[0]);
+                setSyllabusText(""); // Disable text if file is selected
+              }}
+              disabled={!!syllabusText.trim()}
+            />
+            {syllabusImage && (
+              <button
+                className="absolute top-0 right-0 text-red-500 p-2"
+                onClick={handleClearFile}
+              >
+                ✖
+              </button>
+            )}
+          </div>
+          <textarea
+            placeholder="Or type the syllabus here"
+            rows={3}
+            className="w-full p-3 mt-4 bg-white border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            value={syllabusText}
+            onChange={(e) => setSyllabusText(e.target.value)}
+            disabled={!!syllabusImage}
+          ></textarea>
+          <div className="mt-2">
+            <Button onClick={handleGenerateQuestions} loading={loadingQuestion}>
+              Generate
+            </Button>
+          </div>
+        </motion.div>
+        {/* Evaluation */}
+        <motion.div
+          className="col-span-2 p-6 bg-gradient-to-br from-indigo-100 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-300"
+          whileHover={{ scale: 1.02 }}
+        >
+          <h2 className="text-lg font-semibold text-indigo-700 mb-4">Evaluate Performance</h2>
           <input
             type="file"
-            className="block mb-4"
-            id="syllabusUpload"
             accept="image/*"
-            onChange={(e) => {
-              if (e.target.files && e.target.files[0]) {
-                const uploadedFile = e.target.files[0];
-                handleGenerateQuestions(uploadedFile, undefined);
-              }
-            }}
+            className="block w-full mb-4 p-3 bg-white border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            onChange={(e) => setQuestionImage(e.target.files ? e.target.files[0] : null)}
           />
-          <textarea
-            placeholder="Or type the syllabus"
-            className="w-full p-2 border border-gray-400 rounded-md mb-4"
-            rows={4}
-            onBlur={(e) => {
-              const text = e.target.value;
-              if (text.trim()) {
-                handleGenerateQuestions(undefined, text);
-              }
-            }}
-          ></textarea>
+          <input
+            type="file"
+            accept="image/*"
+            className="block w-full mb-4 p-3 bg-white border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            onChange={(e) => setAnswerImage(e.target.files ? e.target.files[0] : null)}
+          />
           <button
-            className={`bg-red-600 text-white px-4 py-2 rounded-md ${loadingQuestion ? "opacity-50 cursor-not-allowed" : ""}`}
-            onClick={() => alert("Please use the input field or text area to submit data.")}
-            disabled={loadingQuestion}
+            onClick={handleEvaluatePerformance}
+            className={`w-full p-1.5 rounded-md text-white font-medium text-sm ${
+              evaluating ? "bg-indigo-300 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"
+            }`}
+            disabled={evaluating}
           >
-            {loadingQuestion ? "Generating..." : "Generate Questions"}
+            {evaluating ? "Evaluating..." : "Evaluate"}
           </button>
-        </div>
-      </div>
+          {evaluationResult && (
+            <motion.div
+              className="mt-4 p-4 bg-white rounded-md text-gray-800 border"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4 }}
+            >
+              <h3 className="text-lg font-semibold">Result:</h3>
+              <p>{evaluationResult}</p>
+            </motion.div>
+          )}
+        </motion.div>
+        </motion.div>
+
 
       {/* Modals */}
       {showArticleModal && (
