@@ -46,7 +46,7 @@ const Footer: FC = () => {
         </div>
       </div>
       <div className="container mx-auto text-center mt-4 border-t border-gray-200 pt-4 px-4">
-        <p>Made with Inquisitiveness by Sagnik Datta</p>
+        <p>Made with Inquisitiveness by Team Prepify</p>
       </div>
     </footer>
   );
