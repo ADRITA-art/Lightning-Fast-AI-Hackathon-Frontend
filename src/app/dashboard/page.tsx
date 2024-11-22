@@ -65,20 +65,21 @@ export default function Home() {
       const response = await axios.post(
         "https://lightning-hackathon-server.onrender.com/generate-questions",
         formData,
-        { headers: { "Content-Type": "multipart/form-data" }, timeout: 10000 }
+        { headers: { "Content-Type": "multipart/form-data" } }
       );
 
-      const shortQuestions = Array.isArray(response.data.short_questions) ? response.data.short_questions : [];
       const descriptiveQuestions = Array.isArray(response.data.descriptive_questions) ? response.data.descriptive_questions : [];
+      const shortQuestions = Array.isArray(response.data.short_questions) ? response.data.short_questions : [];
 
       if (shortQuestions.length > 0 || descriptiveQuestions.length > 0) {
         const formattedContent = [
           "Short Questions:",
-          ...shortQuestions.map((q: { question: string }, i: number) => `${i + 1}. ${q.question || "No question text available"}`),
+          ...shortQuestions.map((q: string, i: number) => `${i + 1}. ${q || "No question short available"}`),
           "",
           "Descriptive Questions:",
-          ...descriptiveQuestions.map((q: { question: string }, i: number) => `${i + 1}. ${q.question || "No question text available"}`),
+          ...descriptiveQuestions.map((q: string, i: number) => `${i + 1}. ${q || "No question text available"}`),
         ].join("\n");
+        
 
         setQuestionContent(formattedContent);
       } else {
@@ -166,7 +167,7 @@ export default function Home() {
           <div className="relative">
             <input
               type="file"
-              accept="image/*"
+              accept=".jpg,.jpeg,.png"
               className="block w-full p-3 bg-white border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
               onChange={(e) => {
                 if (e.target.files) setSyllabusImage(e.target.files[0]);
@@ -199,44 +200,69 @@ export default function Home() {
         </motion.div>
         {/* Evaluation */}
         <motion.div
-          className="col-span-2 p-6 bg-gradient-to-br from-indigo-100 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-300"
-          whileHover={{ scale: 1.02 }}
-        >
-          <h2 className="text-lg font-semibold text-indigo-700 mb-4">Evaluate Performance</h2>
-          <input
-            type="file"
-            accept="image/*"
-            className="block w-full mb-4 p-3 bg-white border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            onChange={(e) => setQuestionImage(e.target.files ? e.target.files[0] : null)}
-          />
-          <input
-            type="file"
-            accept="image/*"
-            className="block w-full mb-4 p-3 bg-white border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            onChange={(e) => setAnswerImage(e.target.files ? e.target.files[0] : null)}
-          />
-          <button
-            onClick={handleEvaluatePerformance}
-            className={`w-full p-1.5 rounded-md text-white font-medium text-sm ${
-              evaluating ? "bg-indigo-300 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"
-            }`}
-            disabled={evaluating}
-          >
-            {evaluating ? "Evaluating..." : "Evaluate"}
-          </button>
-          {evaluationResult && (
-            <motion.div
-              className="mt-4 p-4 bg-white rounded-md text-gray-800 border"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.4 }}
-            >
-              <h3 className="text-lg font-semibold">Result:</h3>
-              <p>{evaluationResult}</p>
-            </motion.div>
-          )}
+  className="col-span-2 p-6 bg-gradient-to-br from-indigo-100 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-300"
+  whileHover={{ scale: 1.02 }}
+>
+  <h2 className="text-lg font-semibold text-indigo-700 mb-4">Evaluate Performance</h2>
+
+  <div className="relative mb-4">
+    <input
+      type="file"
+      accept="image/*"
+      className="block w-64 p-3 bg-white border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+      onChange={(e) => setQuestionImage(e.target.files ? e.target.files[0] : null)}
+    />
+    {questionImage && (
+      <button
+        className="absolute top-0 right-0 text-red-500 p-2"
+        onClick={() => setQuestionImage(null)}
+      >
+        ✖
+      </button>
+    )}
+  </div>
+
+  <div className="relative mb-4">
+    <input
+      type="file"
+      accept="image/*"
+      className="block w-64 p-3 bg-white border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+      onChange={(e) => setAnswerImage(e.target.files ? e.target.files[0] : null)}
+    />
+    {answerImage && (
+      <button
+        className="absolute top-0 right-0 text-red-500 p-2"
+        onClick={() => setAnswerImage(null)}
+      >
+        ✖
+      </button>
+    )}
+  </div>
+
+  {/* Evaluate Button: Only visible when both images are uploaded */}
+  {questionImage && answerImage && (
+        <Button onClick={handleEvaluatePerformance} loading={evaluating}>
+          Evaluate
+        </Button>
+      )}
+ 
+
+  {/* Result Display */}
+  {evaluationResult && (
+    <motion.div
+      className="mt-4 p-4 bg-white rounded-md text-gray-800 border"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+    >
+      <h3 className="text-lg font-semibold">Result:</h3>
+      <p>{evaluationResult}</p>
+    </motion.div>
+  )}
+</motion.div>
+
         </motion.div>
-        </motion.div>
+        
 
 
       {/* Modals */}

@@ -16,7 +16,7 @@ const Button: React.FC<ButtonProps> = ({ onClick, disabled = false, loading = fa
         disabled={disabled || loading}
         className={`button ${disabled || loading ? "disabled" : ""}`}
       >
-        {loading ? "Generating..." : children}
+        {loading ? "Loading..." : children}
       </button>
     </StyledWrapper>
   );
