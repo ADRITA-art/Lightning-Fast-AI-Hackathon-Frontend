@@ -7,6 +7,7 @@ export default function QuestionModal({
   content: string;
   onClose: () => void;
 }) {
+  // Format content into paragraphs and lines
   const formattedContent = content
     .split("\n\n")
     .map((paragraph, index) => (
@@ -19,12 +20,13 @@ export default function QuestionModal({
       </p>
     ));
 
+  // Handle downloading the content as an image
   const handleDownload = async () => {
     const node = document.getElementById("questions-content");
     if (node) {
       try {
         const dataUrl = await toPng(node, {
-          backgroundColor: "white", // Set a solid background
+          backgroundColor: "white", // Ensures white background in the image
         });
         const link = document.createElement("a");
         link.download = "questions.png";
@@ -37,30 +39,40 @@ export default function QuestionModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-md flex justify-center items-center z-50">
-      <div className="bg-white p-10 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-y-auto transform transition-all scale-105 hover:scale-100 duration-300">
-        <h3 className="text-3xl font-extrabold mb-8 text-center text-gray-800 tracking-wide">
-          📋 Generated Questions
-        </h3>
-        {content ? (
-          <div
-            id="questions-content"
-            className="text-gray-800 leading-relaxed text-lg bg-white p-4"
-          >
-            {formattedContent}
-          </div>
-        ) : (
-          <p className="text-gray-500 text-center text-lg">No questions available.</p>
-        )}
-        <div className="flex justify-between items-center mt-10">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-3xl w-full">
+        <div className="flex justify-between items-center border-b pb-4">
+          <h3 className="text-2xl font-bold text-gray-800">
+            📋 Generated Questions
+          </h3>
           <button
-            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-full transition-transform transform hover:scale-110 shadow-md"
+            onClick={onClose}
+            className="text-gray-500 hover:text-red-600 text-2xl"
+          >
+            ✖
+          </button>
+        </div>
+        <div
+          id="questions-content"
+          className="mt-6 max-h-[65vh] overflow-y-auto text-gray-700 leading-relaxed pr-4"
+        >
+          {content ? (
+            <div>{formattedContent}</div>
+          ) : (
+            <p className="text-gray-500 text-center text-lg">
+              No questions available.
+            </p>
+          )}
+        </div>
+        <div className="mt-8 flex justify-end space-x-6">
+          <button
+            className="px-6 py-3 bg-purple-700 hover:bg-purple-800 text-white rounded-lg transition-transform transform hover:scale-105"
             onClick={handleDownload}
           >
-            Download
+            Download as Image
           </button>
           <button
-            className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-full transition-transform transform hover:scale-110 shadow-md"
+            className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-transform transform hover:scale-105"
             onClick={onClose}
           >
             Close

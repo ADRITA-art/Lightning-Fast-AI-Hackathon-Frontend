@@ -9,12 +9,38 @@ export default function ArticleModal({
 }) {
   const handleDownload = () => {
     const doc = new jsPDF();
+  
+    // Remove markdown-like formatting and keep plain text
+    const plainContent = content
+      .replace(/\*\*(.*?)\*\*/g, "$1") // Remove bold markdown (**text**)
+      .replace(/\*(.*?)\*/g, "$1")     // Remove italic markdown (*text*)
+      .replace(/\n/g, "\n");           // Preserve line breaks
+  
+    const margin = 10;
+    const pageHeight = doc.internal.pageSize.height;
+    const lineHeight = 10; // Approximate line height
+    const maxWidth = 180; // Usable width of the page
+    const contentLines = doc.splitTextToSize(plainContent, maxWidth);
+  
+    let yPosition = margin; // Start position for text
+  
     doc.setFont("Helvetica", "normal");
-    doc.text("Generated Article", 10, 10);
-    doc.text(content, 10, 20);
+    doc.text("Generated Article", margin, yPosition);
+    yPosition += lineHeight;
+  
+    // Loop through lines and handle page breaks
+    contentLines.forEach((line: string) => {
+      if (yPosition + lineHeight > pageHeight - margin) {
+        doc.addPage(); // Add a new page if space runs out
+        yPosition = margin; // Reset y position for new page
+      }
+      doc.text(line, margin, yPosition);
+      yPosition += lineHeight; // Move to the next line
+    });
+  
     doc.save("generated-article.pdf");
   };
-
+  
   // Format content: basic Markdown-like handling
   const formattedContent = content
     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // Bold (**text**)
