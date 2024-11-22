@@ -1,7 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
+import { FaTimes } from "react-icons/fa"; 
 import Button from "@/Components/GenerateButton";
 import ArticleModal from "@/Components/ArticleModal";
 import QuestionModal from "@/Components/QuestionModal";
@@ -15,7 +16,6 @@ export default function Home() {
   const [error, setError] = useState("");
   const [questionContent, setQuestionContent] = useState("");
   const [loadingQuestion, setLoadingQuestion] = useState(false);
-  const [image, setImage] = useState(null);
 
   const [syllabusImage, setSyllabusImage] = useState<File | null>(null);
   const [syllabusText, setSyllabusText] = useState("");
@@ -24,7 +24,33 @@ export default function Home() {
   const [answerImage, setAnswerImage] = useState<File | null>(null);
   
   const [evaluationResult, setEvaluationResult] = useState("");
+  const [evaluationScore, setEvaluationScore] = useState<number | null>(null);
   const [evaluating, setEvaluating] = useState(false);
+
+  // Object URLs for image previews
+  const [questionImagePreview, setQuestionImagePreview] = useState<string>("");
+  const [answerImagePreview, setAnswerImagePreview] = useState<string>("");
+
+  // Generate Object URLs when images are selected
+  useEffect(() => {
+    if (questionImage) {
+      const preview = URL.createObjectURL(questionImage);
+      setQuestionImagePreview(preview);
+      return () => URL.revokeObjectURL(preview);
+    } else {
+      setQuestionImagePreview("");
+    }
+  }, [questionImage]);
+
+  useEffect(() => {
+    if (answerImage) {
+      const preview = URL.createObjectURL(answerImage);
+      setAnswerImagePreview(preview);
+      return () => URL.revokeObjectURL(preview);
+    } else {
+      setAnswerImagePreview("");
+    }
+  }, [answerImage]);
 
   const handleGenerateArticle = async () => {
     if (!topic.trim()) {
@@ -73,11 +99,11 @@ export default function Home() {
 
       if (shortQuestions.length > 0 || descriptiveQuestions.length > 0) {
         const formattedContent = [
-          "Short Questions:",
-          ...shortQuestions.map((q: string, i: number) => `${i + 1}. ${q || "No question short available"}`),
+          "### Short Questions:",
+          ...shortQuestions.map((q: string, i: number) => `${i + 1}. ${q || "No short question available."}`),
           "",
-          "Descriptive Questions:",
-          ...descriptiveQuestions.map((q: string, i: number) => `${i + 1}. ${q || "No question text available"}`),
+          "### Descriptive Questions:",
+          ...descriptiveQuestions.map((q: string, i: number) => `${i + 1}. ${q || "No descriptive question available."}`),
         ].join("\n");
         
 
@@ -98,8 +124,9 @@ export default function Home() {
 
   const handleClearFile = () => {
     setSyllabusImage(null);
-    setImage(null);
+    setSyllabusText("");
   };
+
   const handleEvaluatePerformance = async () => {
     if (!questionImage || !answerImage) {
       alert("Please upload both the question and answer images.");
@@ -113,41 +140,56 @@ export default function Home() {
       formData.append("answer_image", answerImage);
 
       const response = await axios.post(
-        "https://lightning-hackathon-server.onrender.com/evaluate-performance",
+        "https://lightning-hackathon-server.onrender.com/evaluate-answer",
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
       setEvaluationResult(response.data.evaluation || "No evaluation available.");
+      setEvaluationScore(response.data.score !== undefined ? response.data.score : null);
     } catch (error) {
       console.error("Error evaluating performance:", error);
       setEvaluationResult("Failed to evaluate performance. Please try again later.");
+      setEvaluationScore(null);
     } finally {
       setEvaluating(false);
     }
   };
 
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-500 to-indigo-600 flex justify-center items-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-500 to-indigo-600 flex flex-col items-center p-6">
+      <motion.h1
+        initial={{ y: -50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="text-5xl md:text-6xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-100 via-blue-200 to-blue-300 mb-6"
+      >
+        Dashboard
+      </motion.h1>
+      {/* Decorative Underline */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
+        initial={{ width: 0 }}
+        animate={{ width: "50%" }}
+        transition={{ duration: 1, ease: "easeOut" }}
+        className="h-2 bg-gradient-to-r from-blue-100 via-blue-200 to-blue-300 mb-12 rounded-full"
+      ></motion.div>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        className="grid grid-cols-2 gap-6 w-full max-w-5xl bg-white p-8 rounded-2xl shadow-2xl"
+        className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-6xl bg-white p-10 rounded-3xl shadow-2xl"
       >
-        {/* Article Generation */}
         <motion.div
-          className="p-6 bg-gradient-to-br from-indigo-100 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-300"
+          className="p-6 bg-gradient-to-tr from-indigo-100 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200"
           whileHover={{ scale: 1.02 }}
         >
-          <h2 className="text-lg font-semibold text-indigo-700 mb-4">Generate Article</h2>
+          <h2 className="text-2xl font-semibold text-indigo-700 mb-4">Generate Article</h2>
           <input
             type="text"
             placeholder="Enter a topic"
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
-            className="w-full p-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400 text-base"
+            className="w-full p-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400 text-base transition"
             style={{ minHeight: "80px" }}
           />
           {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
@@ -158,17 +200,17 @@ export default function Home() {
           </div>
         </motion.div>
 
-        {/* Question Generation */}
         <motion.div
-          className="p-6 bg-gradient-to-br from-indigo-100 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-300"
+          className="p-6 bg-gradient-to-tr from-indigo-100 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200"
           whileHover={{ scale: 1.02 }}
         >
-          <h2 className="text-lg font-semibold text-indigo-700 mb-4">Generate Questions</h2>
-          <div className="relative">
+          <h2 className="text-2xl font-semibold text-indigo-700 mb-4">Generate Questions</h2>
+          <div className="relative mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Syllabus Image:</label>
             <input
               type="file"
               accept=".jpg,.jpeg,.png"
-              className="block w-full p-3 bg-white border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="block w-full p-3 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
               onChange={(e) => {
                 if (e.target.files) setSyllabusImage(e.target.files[0]);
                 setSyllabusText(""); // Disable text if file is selected
@@ -177,93 +219,141 @@ export default function Home() {
             />
             {syllabusImage && (
               <button
-                className="absolute top-0 right-0 text-red-500 p-2"
+                className="absolute top-12 right-4 text-red-500 p-1 rounded-full bg-white shadow hover:bg-gray-100 transition"
                 onClick={handleClearFile}
+                aria-label="Clear syllabus image"
               >
-                ✖
+                <FaTimes />
               </button>
             )}
           </div>
-          <textarea
-            placeholder="Or type the syllabus here"
-            rows={3}
-            className="w-full p-3 mt-4 bg-white border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            value={syllabusText}
-            onChange={(e) => setSyllabusText(e.target.value)}
-            disabled={!!syllabusImage}
-          ></textarea>
-          <div className="mt-2">
+          <div className="relative">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Or Syllabus Text:</label>
+            <textarea
+              placeholder="Type the syllabus here"
+              rows={3}
+              className="w-full p-3 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+              value={syllabusText}
+              onChange={(e) => setSyllabusText(e.target.value)}
+              disabled={!!syllabusImage}
+            ></textarea>
+          </div>
+          <div className="mt-4">
             <Button onClick={handleGenerateQuestions} loading={loadingQuestion}>
               Generate
             </Button>
           </div>
         </motion.div>
-        {/* Evaluation */}
+
         <motion.div
-  className="col-span-2 p-6 bg-gradient-to-br from-indigo-100 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-300"
-  whileHover={{ scale: 1.02 }}
->
-  <h2 className="text-lg font-semibold text-indigo-700 mb-4">Evaluate Performance</h2>
+          className="col-span-1 md:col-span-2 p-6 bg-gradient-to-tr from-indigo-100 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200"
+          whileHover={{ scale: 1.02 }}
+        >
+          <h2 className="text-2xl font-semibold text-indigo-700 mb-4">Evaluate Performance</h2>
 
-  <div className="relative mb-4">
-    <input
-      type="file"
-      accept="image/*"
-      className="block w-64 p-3 bg-white border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
-      onChange={(e) => setQuestionImage(e.target.files ? e.target.files[0] : null)}
-    />
-    {questionImage && (
-      <button
-        className="absolute top-0 right-0 text-red-500 p-2"
-        onClick={() => setQuestionImage(null)}
-      >
-        ✖
-      </button>
-    )}
-  </div>
+          <div className="flex flex-col md:flex-row md:space-x-8 mb-6">
+            <div className="relative flex-1 mb-4 md:mb-0">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Question Image:</label>
+              <input
+                type="file"
+                accept="image/*"
+                className="block w-full p-3 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+                onChange={(e) => setQuestionImage(e.target.files ? e.target.files[0] : null)}
+              />
+              {questionImage && (
+                <button
+                  className="absolute top-12 right-4 text-red-500 p-1 rounded-full bg-white shadow hover:bg-gray-100 transition"
+                  onClick={() => setQuestionImage(null)}
+                  aria-label="Clear question image"
+                >
+                  <FaTimes />
+                </button>
+              )}
+              <p className="mt-2 text-sm text-gray-700">
+                <strong>Question Image:</strong> {questionImage ? questionImage.name : "No file selected."}
+              </p>
+            </div>
 
-  <div className="relative mb-4">
-    <input
-      type="file"
-      accept="image/*"
-      className="block w-64 p-3 bg-white border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
-      onChange={(e) => setAnswerImage(e.target.files ? e.target.files[0] : null)}
-    />
-    {answerImage && (
-      <button
-        className="absolute top-0 right-0 text-red-500 p-2"
-        onClick={() => setAnswerImage(null)}
-      >
-        ✖
-      </button>
-    )}
-  </div>
+            <div className="relative flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Answer Image:</label>
+              <input
+                type="file"
+                accept="image/*"
+                className="block w-full p-3 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+                onChange={(e) => setAnswerImage(e.target.files ? e.target.files[0] : null)}
+              />
+              {answerImage && (
+                <button
+                  className="absolute top-12 right-4 text-red-500 p-1 rounded-full bg-white shadow hover:bg-gray-100 transition"
+                  onClick={() => setAnswerImage(null)}
+                  aria-label="Clear answer image"
+                >
+                  <FaTimes />
+                </button>
+              )}
+              <p className="mt-2 text-sm text-gray-700">
+                <strong>Answer Image:</strong> {answerImage ? answerImage.name : "No file selected."}
+              </p>
+            </div>
+          </div>
 
-  {/* Evaluate Button: Only visible when both images are uploaded */}
-  {questionImage && answerImage && (
-        <Button onClick={handleEvaluatePerformance} loading={evaluating}>
-          Evaluate
-        </Button>
-      )}
- 
+          {questionImage && answerImage && (
+            <div className="mb-6">
+              <Button onClick={handleEvaluatePerformance} loading={evaluating}>
+                Evaluate
+              </Button>
+            </div>
+          )}
 
-  {/* Result Display */}
-  {evaluationResult && (
-    <motion.div
-      className="mt-4 p-4 bg-white rounded-md text-gray-800 border"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.4 }}
-    >
-      <h3 className="text-lg font-semibold">Result:</h3>
-      <p>{evaluationResult}</p>
-    </motion.div>
-  )}
-</motion.div>
+          {evaluationResult && (
+            <motion.div
+              className="mt-4 p-6 bg-gradient-to-tr from-green-100 to-green-50 rounded-md text-gray-800 border border-green-300 shadow-lg"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4 }}
+            >
+              <h3 className="text-2xl font-bold text-green-700 mb-4">Evaluation Result</h3>
+              
+              <div className="flex flex-col md:flex-row md:space-x-8 mb-6">
+                <div className="flex-1">
+                  <p className="font-semibold mb-2">Question Image:</p>
+                  {questionImagePreview && (
+                    <img
+                      src={questionImagePreview}
+                      alt="Question Uploaded"
+                      className="w-full h-auto rounded-md shadow-sm border border-gray-300"
+                      loading="lazy"
+                    />
+                  )}
+                </div>
 
+                <div className="flex-1">
+                  <p className="font-semibold mb-2">Answer Image:</p>
+                  {answerImagePreview && (
+                    <img
+                      src={answerImagePreview}
+                      alt="Answer Uploaded"
+                      className="w-full h-auto rounded-md shadow-sm border border-gray-300"
+                      loading="lazy"
+                    />
+                  )}
+                </div>
+              </div>
+
+              <p className="text-gray-700 leading-relaxed mb-4">{evaluationResult}</p>
+
+              {evaluationScore !== null && (
+                <div className="flex items-center">
+                  <p className="text-lg font-semibold text-gray-800">Score:</p>
+                  <span className="ml-3 px-4 py-2 bg-green-500 text-white text-xl font-bold rounded-full shadow">
+                    {evaluationScore}/10
+                  </span>
+                </div>
+              )}
+            </motion.div>
+          )}
         </motion.div>
-        
-
+      </motion.div>
 
       {/* Modals */}
       {showArticleModal && (
