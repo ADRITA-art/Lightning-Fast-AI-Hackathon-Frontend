@@ -1,5 +1,4 @@
 "use client";
-import { RainbowButton } from "@/Components/ui/rainbow-button";
 import * as React from "react";
 import { useState } from "react";
 import Link from "next/link";
@@ -136,10 +135,6 @@ export default function Navbar() {
         <Link href="/dashboard">
         <PulsatingButton className='bg-white text-black' pulseColor="#FFD700">Dashboard</PulsatingButton>
         </Link>
-        <Link href="#">
-        <RainbowButton>Sign In</RainbowButton>
-          
-        </Link>
       </div>
 
       {/* Mobile Navigation Menu */}
@@ -163,11 +158,7 @@ export default function Navbar() {
          
                 </Link>
               </li>
-              <li>
-                <Link href="#" onClick={toggleMenu} className="block">
-                <RainbowButton>Sign In</RainbowButton>
-                </Link>
-              </li>
+
             </ul>
           </nav>
         </div>
