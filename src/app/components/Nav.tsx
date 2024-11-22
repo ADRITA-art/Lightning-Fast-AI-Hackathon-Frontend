@@ -23,22 +23,22 @@ const components: { title: string; href: string; description: string }[] = [
       "Generate informative articles on any topic to enhance your knowledge base.",
   },
   {
-    title: "Practice Tests",
+    title: "Question generator",
     href: "#",
     description:
-      "Challenge yourself with timed tests across various topics to track your progress.",
+      "Generate questions on any topic to test your knowledge and understanding.",
   },
   {
-    title: "Study Planner",
+    title: "Performance Evaluator",
     href: "#",
     description:
-      "Organize and schedule your study sessions to stay on top of your goals.",
+      "Give questions and upload respective answers to get a detailed performance report.",
   },
   {
-    title: "Virtual Interview",
+    title: "Prepia",
     href: "#",
     description:
-      "Simulate real interviews, get feedback, and improve your responses based on you responses and facial expressions",
+      "A 3D model to acknowledge interactive classroom experience",
   },
 ];
 
@@ -158,8 +158,8 @@ export default function Navbar() {
                 </Link>
               </li>
               <li>
-                <Link href="/interview" onClick={toggleMenu} className="block">
-                <PulsatingButton disabled className='bg-white text-black' pulseColor="#FFD700">Virtual Interview (Beta)</PulsatingButton>
+                <Link href="/dashboard" onClick={toggleMenu} className="block">
+                <PulsatingButton disabled className='bg-white text-black' pulseColor="#FFD700">Dashboard</PulsatingButton>
          
                 </Link>
               </li>
