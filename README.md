@@ -196,3 +196,5 @@ We welcome contributions! Follow these steps to get involved:
 Access the live application [here]((https://capable-mochi-88f88c.netlify.app/)).  
 Explore, learn, and revolutionize your educational journey with **Prepify**!
 ```
+https://capable-mochi-88f88c.netlify.app/
+```
